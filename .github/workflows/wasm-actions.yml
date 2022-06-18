@@ -1,9 +1,0 @@
-name: Wasm Actions
-on: [push]
-jobs:
-  Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: cargo build --release --target wasm32-unknown-unknown
-      - run: wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/mario_mim.wasm
