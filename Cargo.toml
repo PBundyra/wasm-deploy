@@ -19,9 +19,8 @@ bevy = { version = "0.7", features = [
     "x11"
 ] }
 bevy_rapier2d = "0.13"
-bevy_kira_audio = { version = "0.8", features = ["ogg", "wav"] }
+bevy_kira_audio = { version = "0.9", features = ["ogg", "wav"] }
 rand = "*"
-yew = "0.19"
 wasm-bindgen = "0.2"
 
 [profile.dev.package.bevy_rapier2d]

@@ -57,13 +57,11 @@ pub fn destroy_bullet_on_contact(
 ) {
     for collision_event in collision_events.iter() {
         if let CollisionEvent::Started(h1, h2, _) = collision_event {
-            println!("{:?}", collision_event);
             for bullet in bullets.iter() {
-                // if (*h1 == bullet
-                //     && !players.iter().any(|b| *h2 == b)
-                //     && !bullets.iter().any(|b| *h2 == b))
-                //     ||
-                   if (*h2 == bullet
+                if (*h1 == bullet
+                    && !players.iter().any(|b| *h2 == b)
+                    && !bullets.iter().any(|b| *h2 == b))
+                    || (*h2 == bullet
                     && !players.iter().any(|b| *h1 == b)
                     && !bullets.iter().any(|b| *h1 == b))
                 {
@@ -78,14 +76,14 @@ pub fn kill_enemy(
     bullets: Query<Entity, With<Bullet>>,
     enemies: Query<Entity, With<Enemy>>,
     mut collision_event: EventReader<CollisionEvent>,
-    mut send_hit_event: EventWriter<LivingBeingDeathEvent>,
+    mut send_hit_event: EventWriter<LivingBeingHitEvent>,
 ) {
     for collision_event in collision_event.iter() {
         if let CollisionEvent::Started(ent1, ent2, _) = collision_event {
             for bullet in bullets.iter() {
                 for enemy in enemies.iter() {
                     if (*ent1 == bullet && *ent2 == enemy) || (*ent1 == enemy && *ent2 == bullet) {
-                        send_hit_event.send(LivingBeingDeathEvent { entity: enemy });
+                        send_hit_event.send(LivingBeingHitEvent { entity: enemy });
                     }
                 }
             }
