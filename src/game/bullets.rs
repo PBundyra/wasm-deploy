@@ -8,6 +8,10 @@ use crate::GameTextures;
 use super::{GameDirection};
 use super::utils::*;
 
+pub struct ShootEvent;
+
+pub struct FastShootEvent;
+
 const WEAK_BULLET_SPEED: f32 = 8.25;
 const STRONG_BULLET_SPEED: f32 = 18.5;
 
@@ -19,16 +23,15 @@ pub struct BulletOptions {
     pub player_vex: f32,
 }
 
-fn spawn_bullet(commands: &mut Commands, texture: Handle<Image>, bullet_type: Weapon, options: BulletOptions, def_vel : f32) {
+fn spawn_bullet(commands: &mut Commands, texture: Handle<Image>, bullet_type: Weapon, options: BulletOptions, def_vel: f32) {
     let (vel_x, spawn_x) = match options.direction {
         GameDirection::Left => {
             (-def_vel, -0.75)
         }
         GameDirection::Right => {
-            (def_vel,  0.75)
+            (def_vel, 0.75)
         }
     };
-
     spawn_object(commands,
                  create_sprite_bundle(texture, (0.5, 0.2), (options.x + spawn_x, options.y, 0.0)),
                  Some(vel_x),
@@ -37,15 +40,22 @@ fn spawn_bullet(commands: &mut Commands, texture: Handle<Image>, bullet_type: We
                  None,
                  Bullet,
                  bullet_type,
-                Option::None,
     );
 }
 
-pub fn spawn_strong_bullet(commands: &mut Commands, game_textures: &Res<GameTextures>, options: BulletOptions) {
+pub fn spawn_strong_bullet(
+    commands: &mut Commands,
+    game_textures: &Res<GameTextures>,
+    options: BulletOptions,
+) {
     spawn_bullet(commands, game_textures.strong_laser.clone(), Weapon::StrongBullet, options, STRONG_BULLET_SPEED);
 }
 
-pub fn spawn_weak_bullet(commands: &mut Commands, game_textures: &Res<GameTextures>, options: BulletOptions) {
+pub fn spawn_weak_bullet(
+    commands: &mut Commands,
+    game_textures: &Res<GameTextures>,
+    options: BulletOptions,
+) {
     spawn_bullet(commands, game_textures.weak_laser.clone(), Weapon::WeakBullet, options, WEAK_BULLET_SPEED);
 }
 

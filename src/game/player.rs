@@ -1,7 +1,8 @@
+use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::game::{camera_follow_player, FinishLine, GameDirection, Weapon};
+use crate::game::{camera_follow_player, FastShootEvent, FinishLine, GameDirection, ShootEvent, Weapon};
 use crate::game::powerups::{drink_coffee, learn_rust};
 use crate::game::bullets::{BulletOptions, destroy_bullet_on_contact, kill_enemy, spawn_strong_bullet, spawn_weak_bullet};
 use crate::game::living_being::{LivingBeingDeathEvent, LivingBeingHitEvent, on_living_being_dead, on_living_being_hit};
@@ -18,6 +19,8 @@ pub struct PlayerPlugin;
 pub struct DeadPlayerEvent {
     pub entity: Entity,
 }
+
+const SHOOTING_TIMESTEP: f64 = 0.1;
 
 #[derive(Component)]
 pub struct Player {
@@ -41,15 +44,14 @@ impl Player {
     pub fn spawn(commands: &mut Commands, game_textures: Res<GameTextures>) {
         spawn_object(commands,
                      create_sprite_bundle(game_textures.player.clone(),
-                                          (0.9, 0.9),
+                                          (0.9, 1.5),
                                           (0.0, 2.0, 0.0)),
                      None,
                      None,
                      Collider::round_cuboid(0.2, 0.2, 0.1),
                      Some(Friction::coefficient(3.)),
-                     Jumper::default(),
                      Player::default(),
-                     Option::Some(LivingBeing),
+                     LivingBeing::default(),
         );
     }
 
@@ -86,7 +88,6 @@ impl Plugin for PlayerPlugin {
                     .with_system(player_movement)
                     .with_system(jump_reset)
                     .with_system(finish)
-                    .with_system(fire_controller)
                     .with_system(destroy_bullet_on_contact)
                     .with_system(death_by_enemy)
                     .with_system(camera_follow_player)
@@ -97,9 +98,16 @@ impl Plugin for PlayerPlugin {
                     .with_system(on_living_being_dead)
                     .with_system(on_living_being_hit),
             )
+            .add_system_set(
+                SystemSet::new()
+                    .with_run_criteria(FixedTimestep::step(SHOOTING_TIMESTEP))
+                    .with_system(fire_controller)
+            )
             .add_event::<LivingBeingHitEvent>()
             .add_event::<LivingBeingDeathEvent>()
-            .add_event::<DeadPlayerEvent>();
+            .add_event::<DeadPlayerEvent>()
+            .add_event::<ShootEvent>()
+            .add_event::<FastShootEvent>();
     }
 }
 
@@ -152,6 +160,8 @@ pub fn fire_controller(
     mut commands: Commands,
     mut game_textures: Res<GameTextures>,
     positions: Query<(&mut Transform, &RigidBody, &mut Player, &mut Velocity), With<Player>>,
+    mut send_shoot_event: EventWriter<ShootEvent>,
+    mut send_fast_shoot_event: EventWriter<FastShootEvent>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         for (pos, _, player, vel) in positions.iter() {
@@ -162,8 +172,14 @@ pub fn fire_controller(
                 player_vex: vel.linvel.x,
             };
             match player.weapon {
-                Weapon::WeakBullet => spawn_weak_bullet(&mut commands, &mut game_textures, options),
-                Weapon::StrongBullet => spawn_strong_bullet(&mut commands, &mut game_textures, options),
+                Weapon::WeakBullet => {
+                    send_shoot_event.send(ShootEvent);
+                    spawn_weak_bullet(&mut commands, &mut game_textures, options);
+                }
+                Weapon::StrongBullet => {
+                    send_fast_shoot_event.send(FastShootEvent);
+                    spawn_strong_bullet(&mut commands, &mut game_textures, options);
+                }
             }
         }
     }
@@ -186,7 +202,7 @@ pub fn jump_reset(
 
 // TODO zrobić lepiej przy okazji collision eventow
 pub fn finish(
-    mut players: Query<(Entity, &mut Jumper)>,
+    mut players: Query<(Entity, &mut Player)>,
     mut lines: Query<(Entity, &mut FinishLine)>,
     mut contact_events: EventReader<CollisionEvent>,
     mut state: ResMut<State<AppState>>,

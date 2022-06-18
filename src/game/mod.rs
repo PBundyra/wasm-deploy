@@ -70,13 +70,13 @@ fn cleanup_all(mut commands: Commands, query: Query<Entity>) {
 
 fn load_textures(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(GameTextures {
-        player: asset_server.load("images/player.png"),
+        player: asset_server.load("images/wojownik.png"),
         weak_laser: asset_server.load("images/weak_laser.png"),
         strong_laser: asset_server.load("images/strong_laser.png"),
         bug: asset_server.load("images/bug.png"),
         coffee: asset_server.load("images/coffee.png"),
         rust: asset_server.load("images/rust.png"),
-        floor: asset_server.load("images/floor.png"),
+        floor: asset_server.load("images/cobblestone.png"),
         finish_line: asset_server.load("images/finish_line.png"),
     });
 }

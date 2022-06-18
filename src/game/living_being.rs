@@ -24,6 +24,11 @@ pub fn on_living_being_dead(
     mut commands: Commands,
 ) {
     for event in living_being_death_events.iter() {
-        commands.entity(event.entity).despawn_recursive()
+        /*
+         There is a simple despawn instead of despawn_recursively() as simple despawn() handles
+         double despawns for a single enitity and despawn_recursively() panics.
+         */
+        println!("LivingBeingDeathEvent: {:?}", event.entity);
+        commands.entity(event.entity).despawn();
     }
 }
