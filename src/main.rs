@@ -4,7 +4,10 @@ use bevy::window::PresentMode;
 use game::GamePlugin;
 use menu::MenuPlugin;
 
-use crate::game::{GameAudioPlugin, GameTextures, MapPlugin, MonsterAiPlugin, PlayerPlugin};
+use crate::game::{
+    BulletsPlugin, GameAudioPlugin, GameTextures, Level, MapPlugin, MonsterAiPlugin, PlayerPlugin,
+    PowerupsPlugin, Random,
+};
 
 mod game;
 mod menu;
@@ -13,8 +16,9 @@ mod menu;
 pub enum AppState {
     InGame,
     MainMenu,
-    DeathMenu,
-    EndMenu,
+    FailMenu,
+    WinMenu,
+    StopMenu,
 }
 
 fn main() {
@@ -27,12 +31,16 @@ fn main() {
             present_mode: PresentMode::Fifo,
             ..default()
         })
-        .insert_resource(ClearColor(Color::rgb(0.71, 2.13, 2.44)))
+        .insert_resource(ClearColor(Color::BEIGE))
+        .insert_resource(Random::new())
+        .insert_resource(Level::new())
         .add_state(AppState::MainMenu)
+        .add_plugin(GamePlugin)
+        .add_plugin(BulletsPlugin)
         .add_plugin(GameAudioPlugin)
+        .add_plugin(PowerupsPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(MapPlugin)
-        .add_plugin(GamePlugin)
         .add_plugin(MenuPlugin)
         .add_plugin(MonsterAiPlugin)
         .run();
