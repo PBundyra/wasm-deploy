@@ -53,8 +53,7 @@ impl Plugin for GamePlugin {
                 SystemSet::on_update(AppState::InGame).with_system(back_to_main_menu_controls),
             )
             .add_system_set(SystemSet::on_exit(AppState::InGame).with_system(cleanup_all))
-            .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
-            .add_event::<AudioHitEvent>();
+            .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0));
     }
 }
 
@@ -63,7 +62,7 @@ fn back_to_main_menu_controls(
     mut app_state: ResMut<State<AppState>>,
 ) {
     if *app_state.current() == AppState::InGame && keys.just_pressed(KeyCode::Escape) {
-        app_state.set(AppState::StopMenu).unwrap();
+        app_state.push(AppState::StopMenu).unwrap();
         keys.reset(KeyCode::Escape);
     }
 }

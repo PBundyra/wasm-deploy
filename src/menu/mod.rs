@@ -54,7 +54,6 @@ fn setup_main_menu(
         "Mario MIM",
         vec![
             ("New game", MenuButton::NewGame),
-            ("Quit", MenuButton::Quit),
         ],
     );
 }
@@ -109,6 +108,7 @@ fn setup_stop_menu(
         colors,
         textures,
         vec![
+            ("Resume", MenuButton::Resume),
             ("Restart level", MenuButton::RestartLevel),
             ("Restart game", MenuButton::RestartGame),
             ("Go to main menu", MenuButton::MainMenu),
