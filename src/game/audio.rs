@@ -34,7 +34,7 @@ impl Plugin for GameAudioPlugin {
             .add_system_set(SystemSet::on_enter(AppState::InGame).with_system(play_bg_music))
             .add_system_set(SystemSet::on_exit(AppState::InGame).with_system(play_menu_music))
             .add_system(play_simple_audio)
-            .add_system(play_complexed_audio)
+            .add_system(play_complex_audio)
             .add_startup_system(play_menu_music)
             .add_event::<SimpleAudioEvent>()
             .add_event::<ComplexAudioEvent>();
@@ -47,13 +47,9 @@ pub fn play_simple_audio(audio: Res<Audio>, mut audio_event: EventReader<SimpleA
     });
 }
 
-pub fn play_complexed_audio(
-    audio: Res<Audio>,
-    mut audio_event: EventReader<ComplexAudioEvent>,
-    audio_assets: Res<AudioAssets>,
-) {
+pub fn play_complex_audio(audio: Res<Audio>, mut audio_event: EventReader<ComplexAudioEvent>) {
     audio_event.iter().for_each(|event| {
-        let sound_id = thread_rng().gen_range(0..audio_assets.hits.len());
+        let sound_id = thread_rng().gen_range(0..event.audio_src.len());
         audio.play(event.audio_src[sound_id].clone());
     });
 }
