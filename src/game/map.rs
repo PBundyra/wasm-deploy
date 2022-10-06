@@ -12,7 +12,6 @@ const BEGIN_WIDTH: usize = 10;
 pub const SAFE_ZONE_WIDTH: usize = 5;
 pub const GAME_WIDTH: usize = 150;
 const MAP_WIDTH: usize = GAME_WIDTH + BEGIN_WIDTH;
-const WALL_HEIGHT: f32 = 20.0;
 const TILE_SIZE: f32 = 1.0;
 const HALF_TILE_SIZE: f32 = TILE_SIZE / 2.0;
 
@@ -154,13 +153,14 @@ fn add_start_and_finish_line(
         .last()
         .map(|&(x, y)| (x as f32 + 1., y as f32))
         .unwrap_or((0., 0.));
+    let wall_y = world.iter().map(|&(_, y)| y).max().unwrap_or(0) + 20;
 
     add_column_of_tiles(
         commands,
         game_textures.floor.clone(),
         start_x,
         start_y as i32,
-        (start_y + (3 * MAP_WIDTH) as f32) as i32, // protect bullets from flying beyond map
+        wall_y as i32,
     );
     add_column_of_tiles(
         commands,
@@ -174,7 +174,7 @@ fn add_start_and_finish_line(
         game_textures.finish_line.clone(),
         finish_x,
         (finish_y + TILE_SIZE) as i32,
-        (finish_y + WALL_HEIGHT) as i32,
+        wall_y as i32,
     );
 
     spawn_static_collider_object(
@@ -182,7 +182,7 @@ fn add_start_and_finish_line(
         Point::new(start_x - HALF_TILE_SIZE, start_y - HALF_TILE_SIZE),
         Point::new(
             start_x + HALF_TILE_SIZE,
-            start_y + WALL_HEIGHT - HALF_TILE_SIZE,
+            wall_y as f32 - HALF_TILE_SIZE,
         ),
         Wall,
     );
@@ -192,7 +192,7 @@ fn add_start_and_finish_line(
         Point::new(finish_x - HALF_TILE_SIZE, start_y - HALF_TILE_SIZE),
         Point::new(
             finish_x + HALF_TILE_SIZE,
-            finish_y + WALL_HEIGHT - HALF_TILE_SIZE,
+            wall_y as f32 - HALF_TILE_SIZE,
         ),
         Wall,
     );
